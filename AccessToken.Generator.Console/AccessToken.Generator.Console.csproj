@@ -8,6 +8,8 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>atg</ToolCommandName>
         <PackageId>azure-access-token-generator</PackageId>
+        <Authors>Selmir Aljic</Authors>
+        <RepositoryUrl>https://github.com/saljic/azure-access-token-generator</RepositoryUrl>
         <Version>0.0.1</Version>
     </PropertyGroup>
 
