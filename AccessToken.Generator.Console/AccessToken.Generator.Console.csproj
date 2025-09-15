@@ -15,7 +15,7 @@
 
     <ItemGroup>
       <PackageReference Include="Azure.Identity" Version="1.15.0" />
-      <PackageReference Include="Microsoft.Graph" Version="5.91.0" />
+      <PackageReference Include="Microsoft.Graph" Version="5.92.0" />
       <PackageReference Include="FuzzySharp" Version="2.0.2" />
       <PackageReference Include="OneOf" Version="3.0.271" />
       <PackageReference Include="Spectre.Console" Version="0.51.1" />
