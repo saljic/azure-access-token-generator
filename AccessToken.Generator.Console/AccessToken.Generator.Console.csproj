@@ -8,9 +8,10 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>atg</ToolCommandName>
         <PackageId>azure-access-token-generator</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <Authors>Selmir Aljic</Authors>
         <RepositoryUrl>https://github.com/saljic/azure-access-token-generator</RepositoryUrl>
-        <Version>0.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,6 +21,11 @@
       <PackageReference Include="OneOf" Version="3.0.271" />
       <PackageReference Include="Spectre.Console" Version="0.51.1" />
       <PackageReference Include="TextCopy" Version="6.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="../LICENSE" Pack="true" PackagePath="" />
+      <None Include="../README.md" Pack="true" PackagePath="" />
     </ItemGroup>
 
 </Project>
