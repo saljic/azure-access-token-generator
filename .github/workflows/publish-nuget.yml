@@ -26,8 +26,15 @@ jobs:
       - name: Test
         run: dotnet test --no-build --verbosity normal
 
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          TAG_REF=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_REF#v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Pack
-        run: dotnet pack --configuration Release --no-build --output ./artifacts
+        run: dotnet pack --configuration Release --no-build --output ./artifacts /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
 
       - name: Publish to NuGet
         uses: nuget/setup-nuget@v2
