@@ -58,11 +58,19 @@ public sealed class AccessTokenGenerator(GraphServiceClient graphClient, TokenCr
             oneOf.Switch(
                 accessToken =>
                 {
-                    ClipboardService.SetText(accessToken.Token);
-                    AnsiConsole.WriteLine(
-                        $"{Environment.NewLine}The access token has been copied to your clipboard.{Environment.NewLine}");
+                    try
+                    {
+                        ClipboardService.SetText(accessToken.Token);
+                        AnsiConsole.WriteLine( $"{Environment.NewLine}The access token has been copied to your clipboard.{Environment.NewLine}");
+                    } catch
+                    {
+                        AnsiConsole.WriteLine( $"{Environment.NewLine}Failed to copy the access token to clipboard. Falling back to printing to console:{Environment.NewLine}");
+                    }
+                    AnsiConsole.WriteLine(accessToken.Token);
                 },
-                exception => { AnsiConsole.WriteException(exception); });
+                exception => {
+                    AnsiConsole.WriteException(exception);
+                });
 
             var generateAnotherToken = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
