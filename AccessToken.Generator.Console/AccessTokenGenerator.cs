@@ -66,7 +66,7 @@ public sealed class AccessTokenGenerator(GraphServiceClient graphClient, TokenCr
                     {
                         AnsiConsole.WriteLine( $"{Environment.NewLine}Failed to copy the access token to clipboard. Falling back to printing to console:{Environment.NewLine}");
                     }
-                    AnsiConsole.WriteLine(accessToken.Token);
+                    System.Console.WriteLine(accessToken.Token);
                 },
                 exception => {
                     AnsiConsole.WriteException(exception);
