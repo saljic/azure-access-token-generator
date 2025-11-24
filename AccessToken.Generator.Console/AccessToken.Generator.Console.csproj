@@ -15,7 +15,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Azure.Identity" Version="1.17.0" />
+      <PackageReference Include="Azure.Identity" Version="1.17.1" />
       <PackageReference Include="Microsoft.Graph" Version="5.96.0" />
       <PackageReference Include="FuzzySharp" Version="2.0.2" />
       <PackageReference Include="OneOf" Version="3.0.271" />
