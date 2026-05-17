@@ -16,7 +16,6 @@ public sealed class GraphServiceClientBuilder
     
         var defaultAzureCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
         {
-            ExcludeSharedTokenCacheCredential = true,
             ExcludeVisualStudioCodeCredential = true,
             ExcludeVisualStudioCredential = true,
             ExcludeInteractiveBrowserCredential = selectedCredential != "interactive-browser",
