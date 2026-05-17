@@ -21,10 +21,10 @@ public sealed class AccessTokenGenerator(GraphServiceClient graphClient, TokenCr
         {
             var applications = await GetApplicationsAsync(token);
             var applicationsWithAppRole =
-                applications.Where(x => x.AppRoles.Any() && x.IdentifierUris.Any() && x.DisplayName is not null);
+                applications.Where(x => x.AppRoles!.Any() && x.IdentifierUris!.Any() && x.DisplayName is not null);
 
             var filteredApplications = FilterWithFuzzySearch(
-                applicationsWithAppRole.Select(x => x.DisplayName).ToArray(),
+                applicationsWithAppRole.Select(x => x.DisplayName!).ToArray(),
                 "application containing the app role");
 
             AnsiConsole.Clear();
@@ -37,7 +37,7 @@ public sealed class AccessTokenGenerator(GraphServiceClient graphClient, TokenCr
             AnsiConsole.Clear();
 
             var application = applicationsWithAppRole.Single(x =>
-                x.DisplayName.Equals(selectedApplicationName, StringComparison.OrdinalIgnoreCase));
+                x.DisplayName!.Equals(selectedApplicationName, StringComparison.OrdinalIgnoreCase));
 
             var oneOf = await AnsiConsole.Status()
                 .StartAsync($"Requesting access token from [deepskyblue3_1]Azure[/]...", async ctx =>
@@ -45,7 +45,7 @@ public sealed class AccessTokenGenerator(GraphServiceClient graphClient, TokenCr
                     try
                     {
                         // TODO: Allow user to select which identifier and scope
-                        var scope = $"{application.IdentifierUris.First()}/.default";
+                        var scope = $"{application.IdentifierUris!.First()}/.default";
                         var accessToken = await tokenCredential.GetTokenAsync(new TokenRequestContext([scope]), token);
                         return OneOf<Azure.Core.AccessToken, Exception>.FromT0(accessToken);
                     }
@@ -100,7 +100,7 @@ public sealed class AccessTokenGenerator(GraphServiceClient graphClient, TokenCr
 
             var pageIterator = PageIterator<Application, ApplicationCollectionResponse>.CreatePageIterator(
                 graphClient,
-                getApplicationsResponse,
+                getApplicationsResponse!,
                 (sp) =>
                 {
                     progress.Increment(0.5);
