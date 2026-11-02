@@ -9,6 +9,10 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -36,8 +40,14 @@ jobs:
       - name: Pack
         run: dotnet pack --configuration Release --no-build --output ./artifacts /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
 
-      - name: Publish to NuGet
-        uses: nuget/setup-nuget@v2
+      - name: Log in to NuGet.org using OIDC
+        id: nuget-login
+        uses: NuGet/login@v1
         with:
-          nuget-version: "6.x"
-      - run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push "./artifacts/*.nupkg" \
+          --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" \
+          --source "https://api.nuget.org/v3/index.json" \
+          --skip-duplicate
