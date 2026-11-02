@@ -1,6 +1,13 @@
 name: Publish NuGet Package
 
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "NuGet package version, for example 1.0.25"
+        required: true
+        type: string
+
   push:
     tags:
       - "v*.*.*"
@@ -9,35 +16,83 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+    permissions:
+      contents: read
+      id-token: write
 
-      - name: Setup .NET
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.x"
 
+      - name: Determine package version
+        id: get_version
+        shell: bash
+        env:
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          MANUAL_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ "$REF" == refs/tags/v* ]]; then
+            VERSION="${REF_NAME#v}"
+          else
+            VERSION="$MANUAL_VERSION"
+          fi
+
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::No package version was provided."
+            exit 1
+          fi
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid NuGet package version: $VERSION"
+            echo "::error::Use a version such as 1.0.25 or 1.0.25-beta.1"
+            exit 1
+          fi
+
+          echo "Using package version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Restore dependencies
-        run: dotnet restore
+        run: |
+          dotnet restore
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: |
+          dotnet build \
+            --configuration Release \
+            --no-restore \
+            /p:Version=${{ steps.get_version.outputs.version }}
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal
-
-      - name: Extract version from tag
-        id: get_version
         run: |
-          TAG_REF=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG_REF#v}
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          dotnet test \
+            --configuration Release \
+            --no-build \
+            --verbosity normal
 
-      - name: Pack
-        run: dotnet pack --configuration Release --no-build --output ./artifacts /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+      - name: Pack NuGet package
+        run: |
+          dotnet pack \
+            AccessToken.Generator.Console/AccessToken.Generator.Console.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./artifacts \
+            /p:PackageVersion=${{ steps.get_version.outputs.version }}
 
-      - name: Publish to NuGet
-        uses: nuget/setup-nuget@v2
+      - name: Log in to NuGet.org using OIDC
+        id: nuget-login
+        uses: NuGet/login@v1
         with:
-          nuget-version: "6.x"
-      - run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish to NuGet.org
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --skip-duplicate
